@@ -6,7 +6,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class NetheritePortableEngineBlockEntity extends PortableEngineBlockEntity {
-    public static final int FUEL_CONSUMPTION_MULTIPLIER = 4;
+    public static final int FUEL_CONSUMPTION_MULTIPLIER = 16;
 
     public NetheritePortableEngineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -20,7 +20,7 @@ public class NetheritePortableEngineBlockEntity extends PortableEngineBlockEntit
     public void tick() {
         int previousBurnTime = getCurrentBurnTime();
         if (level != null && !isVirtual() && !isCurrentFuelInfinite() && previousBurnTime > 0) {
-            // Simulated consumes the fourth tick, handles refuelling, and updates heat/rotation.
+            // Simulated consumes the final tick, handles refuelling, and updates heat/rotation.
             // Leave at least one tick so it still sees this as a burning engine this tick.
             setCurrentBurnTime(Math.max(1, previousBurnTime - (FUEL_CONSUMPTION_MULTIPLIER - 1)));
         }

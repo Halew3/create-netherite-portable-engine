@@ -37,7 +37,7 @@ public class EngineGameTests {
     private static final BlockPos POS = new BlockPos(1, 1, 1);
 
     @GameTest(template = "empty")
-    public static void fuelBurnsFourTimesAsFast(GameTestHelper helper) {
+    public static void fuelBurnsSixteenTimesAsFast(GameTestHelper helper) {
         CreateNetheritePortableEngine.allEngines().forEach(block -> {
             helper.setBlock(POS, block.defaultBlockState());
             NetheritePortableEngineBlockEntity engine = helper.getBlockEntity(POS);
@@ -51,7 +51,7 @@ public class EngineGameTests {
                 helper.assertTrue(engine.getCurrentBurnTime() == standardDuration, "Fuel should be loaded normally");
                 boolean superheated = engine.isSuperHeated();
                 engine.tick();
-                helper.assertTrue(engine.getCurrentBurnTime() == Math.max(0, standardDuration - 4), "Fuel must drain by four per tick");
+                helper.assertTrue(engine.getCurrentBurnTime() == Math.max(0, standardDuration - 16), "Fuel must drain by sixteen per tick");
                 helper.assertTrue(engine.isSuperHeated() == superheated, "Fuel heat must be preserved");
                 if (fuel.is(Items.LAVA_BUCKET)) {
                     helper.assertTrue(engine.inventory.getItem(0).is(Items.BUCKET), "Lava must leave its bucket");
@@ -59,8 +59,8 @@ public class EngineGameTests {
             }
             engine.inventory.clearContent();
             engine.setCurrentBurnTime(100);
-            for (int tick = 0; tick < 25; tick++) engine.tick();
-            helper.assertTrue(engine.getCurrentBurnTime() == 0, "100 fuel ticks (including cake) must last 25 ticks");
+            for (int tick = 0; tick < 7; tick++) engine.tick();
+            helper.assertTrue(engine.getCurrentBurnTime() == 0, "100 fuel ticks (including cake) must expire after 7 ticks at 16x drain");
             engine.setCurrentBurnTime(PortableEngineBlockEntity.INFINITE_THRESHOLD);
             engine.tick();
             helper.assertTrue(engine.isCurrentFuelInfinite(), "Creative fuel must stay infinite");
