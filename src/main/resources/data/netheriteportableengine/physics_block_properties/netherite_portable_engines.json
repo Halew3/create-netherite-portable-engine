@@ -1,0 +1,6 @@
+{
+  "selector": "#netheriteportableengine:netherite_portable_engines",
+  "properties": {
+    "sable:mass": 16.0
+  }
+}

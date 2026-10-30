@@ -50,8 +50,17 @@ dependencies {
     compileOnly("dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:1.0.6")
 }
 
+sourceSets {
+    gameTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+configurations.gameTestImplementation.extendsFrom(configurations.implementation)
+
 neoForge {
     version = project.neo_version
+    addModdingDependenciesTo(sourceSets.gameTest)
 
     parchment {
         mappingsVersion = project.parchment_mappings_version
@@ -79,6 +88,14 @@ neoForge {
                     '--existing', file('src/main/resources/').absolutePath)
         }
 
+        gameTestServer {
+            type = 'gameTestServer'
+            sourceSet = sourceSets.gameTest
+            gameDirectory = file('build/gametest')
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            systemProperty 'neoforge.gameTestServer', 'true'
+        }
+
         configureEach {
             systemProperty 'forge.logging.markers', 'REGISTRIES'
             logLevel = org.slf4j.event.Level.DEBUG
@@ -88,6 +105,7 @@ neoForge {
     mods {
         "${mod_id}" {
             sourceSet(sourceSets.main)
+            sourceSet(sourceSets.gameTest)
         }
     }
 }

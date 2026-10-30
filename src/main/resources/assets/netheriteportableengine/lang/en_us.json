@@ -1,3 +1,19 @@
 {
-    "block.netheriteportableengine.netherite_portable_engine": "Netherite Portable Engine"
+  "block.netheriteportableengine.netherite_portable_engine": "Netherite Portable Engine",
+  "block.netheriteportableengine.white_netherite_portable_engine": "White Netherite Portable Engine",
+  "block.netheriteportableengine.orange_netherite_portable_engine": "Orange Netherite Portable Engine",
+  "block.netheriteportableengine.magenta_netherite_portable_engine": "Magenta Netherite Portable Engine",
+  "block.netheriteportableengine.light_blue_netherite_portable_engine": "Light Blue Netherite Portable Engine",
+  "block.netheriteportableengine.yellow_netherite_portable_engine": "Yellow Netherite Portable Engine",
+  "block.netheriteportableengine.lime_netherite_portable_engine": "Lime Netherite Portable Engine",
+  "block.netheriteportableengine.pink_netherite_portable_engine": "Pink Netherite Portable Engine",
+  "block.netheriteportableengine.gray_netherite_portable_engine": "Gray Netherite Portable Engine",
+  "block.netheriteportableengine.light_gray_netherite_portable_engine": "Light Gray Netherite Portable Engine",
+  "block.netheriteportableengine.cyan_netherite_portable_engine": "Cyan Netherite Portable Engine",
+  "block.netheriteportableengine.purple_netherite_portable_engine": "Purple Netherite Portable Engine",
+  "block.netheriteportableengine.blue_netherite_portable_engine": "Blue Netherite Portable Engine",
+  "block.netheriteportableengine.brown_netherite_portable_engine": "Brown Netherite Portable Engine",
+  "block.netheriteportableengine.green_netherite_portable_engine": "Green Netherite Portable Engine",
+  "block.netheriteportableengine.red_netherite_portable_engine": "Red Netherite Portable Engine",
+  "block.netheriteportableengine.black_netherite_portable_engine": "Black Netherite Portable Engine"
 }

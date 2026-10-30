@@ -7,14 +7,23 @@ import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import dev.simulated_team.simulated.Simulated;
 import dev.simulated_team.simulated.content.blocks.portable_engine.PortableEngineBlockEntity;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -28,13 +37,9 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
 import ru.vladislav117.netheriteportableengine.content.NetheritePortableEngineBlock;
+import ru.vladislav117.netheriteportableengine.content.NetheritePortableEngineBlockEntity;
 import ru.vladislav117.netheriteportableengine.content.recipe.PortableEngineDyeingRecipe;
 import ru.vladislav117.netheriteportableengine.data.NetheritePortableEngineDataGen;
-
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
 
 @Mod(CreateNetheritePortableEngine.ID)
 public class CreateNetheritePortableEngine {
@@ -47,11 +52,33 @@ public class CreateNetheritePortableEngine {
     public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<PortableEngineDyeingRecipe>> PORTABLE_ENGINE_DYEING =
             RECIPE_SERIALIZERS.register("portable_engine_dyeing", () -> new SimpleCraftingRecipeSerializer<>(PortableEngineDyeingRecipe::new));
     private static final ResourceLocation NETHERITE_PORTABLE_ENGINE_ID = ResourceLocation.fromNamespaceAndPath(ID, "netherite_portable_engine");
-    public static final DeferredBlock<NetheritePortableEngineBlock> NETHERITE_PORTABLE_ENGINE = BLOCKS.register(NETHERITE_PORTABLE_ENGINE_ID.getPath(), () -> new NetheritePortableEngineBlock(BlockBehaviour.Properties.ofFullCopy(SharedProperties.stone())
-            .sound(SoundType.NETHERITE_BLOCK)
-            .lightLevel(state -> NetheritePortableEngineBlock.isLitState(state) ? 6 : 0)
-            .noOcclusion()));
+    public static final DeferredBlock<NetheritePortableEngineBlock> NETHERITE_PORTABLE_ENGINE = registerEngine("netherite_portable_engine", DyeColor.BLACK);
     public static final DeferredItem<BlockItem> NETHERITE_PORTABLE_ENGINE_ITEM = ITEMS.registerSimpleBlockItem(NETHERITE_PORTABLE_ENGINE_ID.getPath(), NETHERITE_PORTABLE_ENGINE);
+    public static final Map<DyeColor, DeferredBlock<NetheritePortableEngineBlock>> DYED_ENGINES = registerDyedEngines();
+
+    private static DeferredBlock<NetheritePortableEngineBlock> registerEngine(String name, DyeColor color) {
+        return BLOCKS.register(name, () -> new NetheritePortableEngineBlock(BlockBehaviour.Properties.ofFullCopy(SharedProperties.stone())
+                .sound(SoundType.NETHERITE_BLOCK)
+                .lightLevel(state -> NetheritePortableEngineBlock.isLitState(state) ? 6 : 0)
+                .noOcclusion(), color));
+    }
+
+    private static Map<DyeColor, DeferredBlock<NetheritePortableEngineBlock>> registerDyedEngines() {
+        Map<DyeColor, DeferredBlock<NetheritePortableEngineBlock>> engines = new EnumMap<>(DyeColor.class);
+        for (DyeColor color : DyeColor.values()) {
+            String name = color.getSerializedName() + "_netherite_portable_engine";
+            DeferredBlock<NetheritePortableEngineBlock> block = registerEngine(name, color);
+            engines.put(color, block);
+            ITEMS.registerSimpleBlockItem(name, block);
+        }
+        return Map.copyOf(engines);
+    }
+
+    public static Stream<NetheritePortableEngineBlock> allEngines() {
+        return Stream.concat(Stream.of(NETHERITE_PORTABLE_ENGINE.get()),
+                Arrays.stream(DyeColor.values()).map(color -> DYED_ENGINES.get(color).get()));
+    }
+
     private static final ResourceLocation RED_PORTABLE_ENGINE = ResourceLocation.fromNamespaceAndPath(Simulated.MOD_ID, "red_portable_engine");
 
     public CreateNetheritePortableEngine(IEventBus modEventBus) {
@@ -65,25 +92,31 @@ public class CreateNetheritePortableEngine {
     }
 
     private static PortableEngineBlockEntity createNetheritePortableEngineBlockEntity(BlockPos pos, BlockState state) {
-        return new PortableEngineBlockEntity(NETHERITE_PORTABLE_ENGINE_BE.get(), pos, state);
-    }    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PortableEngineBlockEntity>> NETHERITE_PORTABLE_ENGINE_BE =
+        return new NetheritePortableEngineBlockEntity(NETHERITE_PORTABLE_ENGINE_BE.get(), pos, state);
+    }
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PortableEngineBlockEntity>> NETHERITE_PORTABLE_ENGINE_BE =
             BLOCK_ENTITY_TYPES.register(NETHERITE_PORTABLE_ENGINE_ID.getPath(), () -> BlockEntityType.Builder
-                    .of(CreateNetheritePortableEngine::createNetheritePortableEngineBlockEntity, NETHERITE_PORTABLE_ENGINE.get())
+                    .of(CreateNetheritePortableEngine::createNetheritePortableEngineBlockEntity, allEngines().toArray(Block[]::new))
                     .build(null));
 
     private void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
-            BlockStressValues.CAPACITIES.register(NETHERITE_PORTABLE_ENGINE.get(), () -> 256.0);
-            BlockStressValues.RPM.register(NETHERITE_PORTABLE_ENGINE.get(), new BlockStressValues.GeneratedRpm(32, false));
+            allEngines().forEach(block -> {
+                BlockStressValues.CAPACITIES.register(block, () -> 256.0);
+                BlockStressValues.RPM.register(block, new BlockStressValues.GeneratedRpm(32, false));
+            });
             registerTooltips();
             addToSimulatedCreativeTab();
         });
     }
 
     private void registerTooltips() {
-        Item item = NETHERITE_PORTABLE_ENGINE_ITEM.get();
-        TooltipModifier tooltip = TooltipModifier.mapNull(KineticStats.create(item));
-        TooltipModifier.REGISTRY.register(item, tooltip);
+        allEngines().forEach(block -> {
+            Item item = block.asItem();
+            TooltipModifier tooltip = TooltipModifier.mapNull(KineticStats.create(item));
+            TooltipModifier.REGISTRY.register(item, tooltip);
+        });
     }
 
     @SuppressWarnings("unchecked")

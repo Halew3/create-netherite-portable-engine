@@ -16,11 +16,11 @@ public class NetheritePortableEngineLootProvider extends BlockLootSubProvider {
 
     @Override
     protected void generate() {
-        dropSelf(CreateNetheritePortableEngine.NETHERITE_PORTABLE_ENGINE.get());
+        CreateNetheritePortableEngine.allEngines().forEach(this::dropSelf);
     }
 
     @Override
     protected @NotNull Iterable<Block> getKnownBlocks() {
-        return Set.of(CreateNetheritePortableEngine.NETHERITE_PORTABLE_ENGINE.get());
+        return CreateNetheritePortableEngine.allEngines().map(block -> (Block) block).toList();
     }
 }

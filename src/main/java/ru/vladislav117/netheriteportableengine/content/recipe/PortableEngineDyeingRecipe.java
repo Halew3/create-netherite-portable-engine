@@ -14,6 +14,8 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import ru.vladislav117.netheriteportableengine.content.NetheritePortableEngineBlock;
 import net.neoforged.neoforge.common.Tags;
 import org.jetbrains.annotations.NotNull;
 import ru.vladislav117.netheriteportableengine.CreateNetheritePortableEngine;
@@ -36,7 +38,7 @@ public class PortableEngineDyeingRecipe extends CustomRecipe {
                 continue;
             }
 
-            if (stack.is(COMMON_PORTABLE_ENGINES)) {
+            if (stack.is(COMMON_PORTABLE_ENGINES) || Block.byItem(stack.getItem()) instanceof NetheritePortableEngineBlock) {
                 engines++;
             } else if (stack.is(Tags.Items.DYES)) {
                 dyes++;
@@ -63,7 +65,7 @@ public class PortableEngineDyeingRecipe extends CustomRecipe {
                 continue;
             }
 
-            if (stack.is(COMMON_PORTABLE_ENGINES)) {
+            if (stack.is(COMMON_PORTABLE_ENGINES) || Block.byItem(stack.getItem()) instanceof NetheritePortableEngineBlock) {
                 engine = stack;
             } else {
                 DyeColor dyeColor = DyeColor.getColor(stack);
@@ -73,7 +75,12 @@ public class PortableEngineDyeingRecipe extends CustomRecipe {
             }
         }
 
-        ItemStack dyedEngine = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(Simulated.MOD_ID, color.getSerializedName() + "_portable_engine")).getDefaultInstance();
+        if (engine.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        ItemStack dyedEngine = Block.byItem(engine.getItem()) instanceof NetheritePortableEngineBlock
+                ? CreateNetheritePortableEngine.DYED_ENGINES.get(color).get().asItem().getDefaultInstance()
+                : BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(Simulated.MOD_ID, color.getSerializedName() + "_portable_engine")).getDefaultInstance();
         if (!engine.isComponentsPatchEmpty()) {
             dyedEngine.applyComponents(engine.getComponentsPatch());
         }
