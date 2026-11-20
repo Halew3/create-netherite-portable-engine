@@ -12,7 +12,7 @@ The mod adds the **Netherite Portable Engine** block, which is four times more p
 
 Based on [Vladislav117/create-netherite-portable-engine](https://github.com/Vladislav117/create-netherite-portable-engine), commit `9918f1cbb8f7c8f4914fe97aa28bce55fc44d609`.
 
-- All finite fuels burn sixteen times as fast, including superheated fuels and cake. Creative infinite fuel stays infinite.
+- All finite fuels burn eight times as fast, including superheated fuels and cake. Engineer's Goggles show the remaining running time at that rate. Creative infinite fuel stays infinite.
 - Every netherite engine has a Sable mass of 16 units (kpg).
 - Dyeing works in the crafting grid and by using dye on a placed engine, with all 16 dye colors. The engine stays netherite and keeps its power, fuel, direction, and heat when recolored in place. Crafting preserves item components.
 - The original block ID is preserved for existing worlds. Colored variants retain their color when mined.
@@ -46,4 +46,4 @@ Run the server regression tests after generating data:
 ./gradlew runGameTestServer
 ```
 
-The four tests cover finite fuel drain and bucket remainders, creative fuel, all 16 crafting colors and item components, recoloring a running engine without losing state, colored loot, Sable mass across every block state, and unchanged power/ordinary engines. Tests and their structure template are excluded from the mod JAR.
+The server tests cover finite fuel drain and bucket remainders, the goggles countdown, creative fuel, all 16 crafting colors and item components, recoloring a running engine without losing state, colored loot, Sable mass across every block state, and unchanged power/ordinary engines. Tests and their structure template are excluded from the mod JAR.

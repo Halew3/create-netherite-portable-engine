@@ -37,7 +37,7 @@ public class EngineGameTests {
     private static final BlockPos POS = new BlockPos(1, 1, 1);
 
     @GameTest(template = "empty")
-    public static void fuelBurnsSixteenTimesAsFast(GameTestHelper helper) {
+    public static void fuelBurnsEightTimesAsFast(GameTestHelper helper) {
         CreateNetheritePortableEngine.allEngines().forEach(block -> {
             helper.setBlock(POS, block.defaultBlockState());
             NetheritePortableEngineBlockEntity engine = helper.getBlockEntity(POS);
@@ -51,7 +51,7 @@ public class EngineGameTests {
                 helper.assertTrue(engine.getCurrentBurnTime() == standardDuration, "Fuel should be loaded normally");
                 boolean superheated = engine.isSuperHeated();
                 engine.tick();
-                helper.assertTrue(engine.getCurrentBurnTime() == Math.max(0, standardDuration - 16), "Fuel must drain by sixteen per tick");
+                helper.assertTrue(engine.getCurrentBurnTime() == Math.max(0, standardDuration - 8), "Fuel must drain by eight per tick");
                 helper.assertTrue(engine.isSuperHeated() == superheated, "Fuel heat must be preserved");
                 if (fuel.is(Items.LAVA_BUCKET)) {
                     helper.assertTrue(engine.inventory.getItem(0).is(Items.BUCKET), "Lava must leave its bucket");
@@ -59,8 +59,8 @@ public class EngineGameTests {
             }
             engine.inventory.clearContent();
             engine.setCurrentBurnTime(100);
-            for (int tick = 0; tick < 7; tick++) engine.tick();
-            helper.assertTrue(engine.getCurrentBurnTime() == 0, "100 fuel ticks (including cake) must expire after 7 ticks at 16x drain");
+            for (int tick = 0; tick < 13; tick++) engine.tick();
+            helper.assertTrue(engine.getCurrentBurnTime() == 0, "100 fuel ticks (including cake) must expire after 13 ticks at 8x drain");
             engine.setCurrentBurnTime(PortableEngineBlockEntity.INFINITE_THRESHOLD);
             engine.tick();
             helper.assertTrue(engine.isCurrentFuelInfinite(), "Creative fuel must stay infinite");
@@ -72,6 +72,26 @@ public class EngineGameTests {
         regular.setCurrentBurnTime(100);
         regular.tick();
         helper.assertTrue(regular.getCurrentBurnTime() == 99, "Ordinary engines must remain unchanged");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void gogglesTimesTrackActualTicks(GameTestHelper helper) {
+        helper.setBlock(POS, CreateNetheritePortableEngine.NETHERITE_PORTABLE_ENGINE.get().defaultBlockState());
+        NetheritePortableEngineBlockEntity engine = helper.getBlockEntity(POS);
+        engine.inventory.slot.setStack(new ItemStack(Items.COAL, 2));
+        engine.tick();
+        helper.assertTrue(engine.getCurrentRunningTicks() == 200, "One coal must show ten seconds of burn time");
+        helper.assertTrue(engine.getTotalRunningTicks() == 400, "Two coal must show twenty seconds of burn time");
+
+        for (int tick = 0; tick < 20; tick++) engine.tick();
+        helper.assertTrue(engine.getCurrentRunningTicks() == 180, "The current fuel must count down one second");
+        helper.assertTrue(engine.getTotalRunningTicks() == 380, "Total fuel must count down one second");
+
+        engine.inventory.slot.setStack(new ItemStack(Items.STICK, 3));
+        engine.setCurrentBurnTime(1);
+        helper.assertTrue(engine.getCurrentRunningTicks() == 1, "The last partial fuel tick still takes a full game tick");
+        helper.assertTrue(engine.getTotalRunningTicks() == 40, "Round each queued stick up to its full thirteen ticks");
         helper.succeed();
     }
 

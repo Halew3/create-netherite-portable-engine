@@ -12,6 +12,9 @@ Create Simulated addon that adds a netherite portable engine.
 '''
 logoFile="assets/netheriteportableengine/icon.png"
 
+[[mixins]]
+config="netheriteportableengine.mixins.json"
+
 [[dependencies.${mod_id}]]
 modId="minecraft"
 type="required"
